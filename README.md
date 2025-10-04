@@ -75,6 +75,34 @@ OAuth2 예제코드 작성 (with Codex)
 | 409 | `USR002` | 이미 등록된 이메일일 때 |
 | 500 | `INTERNAL_SERVER_ERROR` | 예상치 못한 서버 오류 |
 
+- **후속 동작**: 응답과 동시에 인증 메일이 발송됩니다. 수신자가 60분 내 토큰을 인증해야 로그인 허용 플래그가 `true`로 변경됩니다.
+
+#### POST `/api/auth/verify-email`
+- **설명**: 이메일로 전달된 인증 토큰을 서버에 전달해 검증을 완료합니다. 성공 시 `User.emailVerified` 및 `EmailAccount.verified`가 `true`로 변경됩니다.
+- **요청 본문 (JSON)**
+
+| 필드 | 타입 | 필수 | 설명 |
+| ---- | ---- | ---- | ---- |
+| `token` | string | Y | 이메일에 포함된 검증 토큰 |
+
+- **성공 응답 (200 OK)**
+
+```json
+{
+  "email": "user@example.com",
+  "verified": true,
+  "verifiedAt": "2025-10-04T07:45:01.123456"
+}
+```
+
+- **오류 코드**
+
+| HTTP 상태 | 코드 | 설명 |
+| --------- | ---- | ---- |
+| 400 | `VER001` | 존재하지 않는 토큰 |
+| 400 | `VER002` | 만료된 토큰 |
+| 400 | `VER003` | 이미 사용한 토큰 |
+
 #### 테스트 예제
 
 1. **정상 요청**
@@ -116,3 +144,22 @@ curl -i \
 ### 실행 및 자동화 테스트
 - 애플리케이션 실행: `./gradlew bootRun`
 - 단위/슬라이스 테스트: `./gradlew test`
+
+## 이메일 발송 환경 변수 (Gmail 사용 시)
+
+| 환경 변수 | 설명 | 예시 |
+| ---------- | ---- | ---- |
+| `MAIL_HOST` | SMTP 서버 호스트 | `smtp.gmail.com` |
+| `MAIL_PORT` | SMTP 포트 | `587` |
+| `MAIL_USERNAME` | Gmail 주소 (보내는 계정) | `your.account@gmail.com` |
+| `MAIL_PASSWORD` | Gmail 앱 비밀번호 | `xxxx xxxx xxxx xxxx` |
+| `VERIFICATION_BASE_URL` | 인증 링크 기본 URL (`token` 값이 뒤에 붙음) | `https://your-domain.com/verify-email?token=` |
+| `VERIFICATION_FROM_NAME` | 메일 본문에 노출될 발신자 이름 | `OAuth2 Practice` |
+| `VERIFICATION_EXPIRATION_MINUTES` | 토큰 만료 시간(분) | `60` |
+
+### Gmail 앱 비밀번호 발급 요약
+1. Gmail 계정에서 2단계 인증(2FA)을 반드시 활성화합니다.
+2. Google 계정 보안 설정에서 “앱 비밀번호”를 선택해 새 비밀번호를 생성합니다. (앱 이름은 임의로 설정 가능)
+3. 생성된 16자리 앱 비밀번호를 `MAIL_PASSWORD` 환경 변수에 설정합니다.
+4. `MAIL_USERNAME`에는 실제 Gmail 주소, `MAIL_HOST= smtp.gmail.com`, `MAIL_PORT=587`을 사용하고 STARTTLS를 활성화합니다(기본값).
+5. 로컬 실행 시에는 `.env` 파일이나 IDE의 Run Configuration에 환경 변수를 추가하고, 배포 시에는 인프라 환경 변수로 주입해 주세요.

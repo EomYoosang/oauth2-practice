@@ -17,6 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailAccountRepository emailAccountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
 
     @Transactional
     public User registerUser(String email, String rawPassword) {
@@ -28,6 +29,7 @@ public class UserService {
         User savedUser = userRepository.save(user);
         EmailAccount emailAccount = EmailAccount.create(savedUser, email, encodedPassword);
         emailAccountRepository.save(emailAccount);
+        emailVerificationService.sendVerificationEmail(emailAccount);
         return savedUser;
     }
 

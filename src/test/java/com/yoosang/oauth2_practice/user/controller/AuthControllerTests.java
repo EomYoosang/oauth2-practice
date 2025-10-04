@@ -9,8 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yoosang.oauth2_practice.config.SecurityConfig;
 import com.yoosang.oauth2_practice.user.dto.SignUpRequest;
+import com.yoosang.oauth2_practice.user.dto.VerifyEmailRequest;
 import com.yoosang.oauth2_practice.user.entity.User;
 import com.yoosang.oauth2_practice.user.exception.UserException;
+import com.yoosang.oauth2_practice.user.service.EmailVerificationService;
+import com.yoosang.oauth2_practice.user.service.EmailVerificationService.EmailVerificationResult;
 import com.yoosang.oauth2_practice.user.service.UserService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +38,9 @@ class AuthControllerTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private EmailVerificationService emailVerificationService;
 
     @Test
     @DisplayName("회원가입 요청이 유효하면 201 Created를 반환한다")
@@ -94,5 +100,22 @@ class AuthControllerTests {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("USR002"))
                 .andExpect(jsonPath("$.message").value("이메일 duplicate@example.com는 이미 사용 중입니다."));
+    }
+
+    @Test
+    @DisplayName("인증 토큰이 유효하면 이메일 인증을 완료한다")
+    void verifyEmail_shouldReturnOk() throws Exception {
+        String token = "test-token";
+        EmailVerificationResult result = EmailVerificationResult.of("tester1@example.com", true, LocalDateTime.now());
+        given(emailVerificationService.verifyToken(token)).willReturn(result);
+
+        VerifyEmailRequest request = new VerifyEmailRequest(token);
+
+        mockMvc.perform(post("/api/auth/verify-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("tester1@example.com"))
+                .andExpect(jsonPath("$.verified").value(true));
     }
 }

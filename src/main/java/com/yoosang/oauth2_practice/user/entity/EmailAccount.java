@@ -36,11 +36,15 @@ public class EmailAccount {
     @Column(nullable = false)
     private boolean primaryAccount;
 
+    @Column(nullable = false)
+    private boolean verified;
+
     private EmailAccount(User user, String email, String password, boolean primaryAccount) {
         this.user = user;
         this.email = email;
         this.password = password;
         this.primaryAccount = primaryAccount;
+        this.verified = false;
     }
 
     public static EmailAccount create(User user, String email, String encodedPassword) {
@@ -49,5 +53,9 @@ public class EmailAccount {
 
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void markVerified() {
+        this.verified = true;
     }
 }

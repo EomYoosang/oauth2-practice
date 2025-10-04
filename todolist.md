@@ -1,8 +1,8 @@
 # Todo List (PRD 기반)
 
 ## 1단계: 이메일/비밀번호 로그인 및 토큰 인프라
-- [ ] [#11](https://github.com/EomYoosang/oauth2-practice/issues/11) 회원가입 플로우 구현 (이메일 중복 검사, BCrypt 비밀번호 해시)
-- [ ] [#12](https://github.com/EomYoosang/oauth2-practice/issues/12) 이메일 검증 토큰 발송 및 검증 완료 후 로그인 허용 로직 완료
+- [x] [#11](https://github.com/EomYoosang/oauth2-practice/issues/11) 회원가입 플로우 구현 (이메일 중복 검사, BCrypt 비밀번호 해시)
+- [x] [#12](https://github.com/EomYoosang/oauth2-practice/issues/12) 이메일 검증 토큰 발송 및 검증 완료 후 로그인 허용 로직 완료 *(후속: 이메일 인증을 6자리 PIN 코드로 전환)*
 - [ ] [#13](https://github.com/EomYoosang/oauth2-practice/issues/13) `/login` 화면에서 이메일/비밀번호 UI + 소셜 버튼 배치 기본 골격 구성
 - [ ] [#14](https://github.com/EomYoosang/oauth2-practice/issues/14) 로그인 실패 5회 잠금 로직 및 Redis 기반 잠금 상태 저장 구현
 - [ ] [#15](https://github.com/EomYoosang/oauth2-practice/issues/15) JWT 액세스 토큰 발급 로직 작성 (만료 15분, jti 포함)

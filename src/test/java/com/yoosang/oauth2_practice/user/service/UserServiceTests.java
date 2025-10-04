@@ -2,6 +2,8 @@ package com.yoosang.oauth2_practice.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
 
 import com.yoosang.oauth2_practice.user.entity.EmailAccount;
 import com.yoosang.oauth2_practice.user.entity.User;
@@ -10,11 +12,13 @@ import com.yoosang.oauth2_practice.user.exception.UserException;
 import com.yoosang.oauth2_practice.user.exception.UserExceptionCode;
 import com.yoosang.oauth2_practice.user.repository.EmailAccountRepository;
 import com.yoosang.oauth2_practice.user.repository.UserRepository;
+import com.yoosang.oauth2_practice.user.service.EmailVerificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,6 +40,9 @@ class UserServiceTests {
     @Autowired
     private EmailAccountRepository emailAccountRepository;
 
+    @MockBean
+    private EmailVerificationService emailVerificationService;
+
     @Test
     @DisplayName("회원 가입 시 비밀번호를 암호화하고 저장한다")
     void registerUser_shouldEncodePasswordAndPersist() {
@@ -53,6 +60,7 @@ class UserServiceTests {
         assertThat(passwordEncoder.matches(rawPassword, emailAccount.getPassword())).isTrue();
         assertThat(savedUser.isEmailVerified()).isFalse();
         assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
+        then(emailVerificationService).should().sendVerificationEmail(any(EmailAccount.class));
     }
 
     @Test
